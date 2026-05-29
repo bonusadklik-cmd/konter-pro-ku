@@ -3,135 +3,1079 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Manajemen Konter HP & Kredit Pro (CC)</title>
+    <title>Sistem Manajemen Konter HP & Kredit Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .sidebar-item.active { background-color: #1e293b; color: white; }
+        .sidebar-item { transition: all 0.2s ease; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+<body class="bg-slate-50">
 
-<!-- LOGIN SCREEN -->
-<div id="login-screen" class="fixed inset-0 bg-slate-900 flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-3xl w-full max-w-md p-8 shadow-2xl border border-slate-800">
-        <div class="text-center space-y-2">
-            <div class="inline-flex bg-cyan-500 text-slate-900 p-4 rounded-2xl shadow-lg shadow-cyan-500/20 mb-2">
-                <i class="fa-solid fa-mobile-screen-button text-3xl"></i>
-            </div>
-            <h1 class="text-2xl font-extrabold text-slate-900">Konter HP & CC</h1>
-            <p class="text-xs text-slate-500">Sistem POS, Stok IMEI, Manajemen Kredit & Arus Kas</p>
+<!-- LAYAR LOGIN -->
+<div id="login-screen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl w-full max-w-md p-8 mx-4 shadow-2xl">
+        <div class="text-center mb-6">
+            <i class="fa-solid fa-store text-5xl text-cyan-500 mb-3"></i>
+            <h1 class="text-2xl font-bold">Konter HP & CC</h1>
+            <p class="text-sm text-slate-500">Sistem POS & Manajemen Kredit</p>
         </div>
-        <form id="loginForm" class="space-y-4 mt-6" onsubmit="handleLogin(event)">
-            <div>
-                <label class="text-xs font-bold text-slate-500">Username</label>
-                <input type="text" id="login-username" class="w-full px-4 py-3 border rounded-xl text-sm focus:ring-2 focus:ring-cyan-500" placeholder="admin" required>
-            </div>
-            <div>
-                <label class="text-xs font-bold text-slate-500">Password</label>
-                <input type="password" id="login-password" class="w-full px-4 py-3 border rounded-xl text-sm focus:ring-2 focus:ring-cyan-500" placeholder="••••••••" required>
-            </div>
-            <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl">Masuk Ke Sistem <i class="fa-solid fa-arrow-right ml-1"></i></button>
+        <form onsubmit="handleLogin(event)">
+            <input type="text" id="login-user" placeholder="Username" class="w-full p-3 border rounded-xl mb-3" required>
+            <input type="password" id="login-pass" placeholder="Password" class="w-full p-3 border rounded-xl mb-4" required>
+            <button class="w-full bg-slate-800 text-white p-3 rounded-xl font-semibold">Login</button>
         </form>
-        <div class="text-center text-[11px] text-slate-400 mt-4">Default: Username: admin | Password: admin</div>
+        <p class="text-center text-xs text-slate-400 mt-4">Username: admin | Password: admin</p>
     </div>
 </div>
 
-<!-- MAIN APP -->
-<div id="main-app" class="hidden flex-1 flex-col md:flex-row min-h-screen">
-    <!-- Sidebar -->
-    <aside class="bg-slate-900 text-slate-300 w-72 min-h-screen shrink-0 p-5 shadow-xl fixed md:sticky top-0 z-40 overflow-y-auto">
-        <div class="flex items-center space-x-3 pb-8 border-b border-slate-800">
-            <div class="bg-cyan-500 p-2.5 rounded-xl text-slate-900"><i class="fa-solid fa-store text-2xl"></i></div>
-            <div><h1 class="font-bold text-lg text-white">Konter HP & CC</h1><p class="text-xs text-cyan-400">Sistem Pos & Kredit HP</p></div>
-        </div>
-        <nav class="space-y-1.5 mt-6">
-            <button onclick="switchView('dashboard')" class="nav-btn w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-slate-400"><i class="fa-solid fa-chart-pie w-5"></i><span>Dashboard</span></button>
-            <button onclick="switchView('transaksi')" class="nav-btn w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-slate-400"><i class="fa-solid fa-cash-register w-5"></i><span>Kasir</span></button>
-            <button onclick="switchView('riwayat')" class="nav-btn w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-slate-400"><i class="fa-solid fa-clock-rotate-left w-5"></i><span>Riwayat</span></button>
-            <button onclick="switchView('kredit')" class="nav-btn w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-slate-400"><i class="fa-solid fa-credit-card w-5"></i><span>Kredit</span></button>
-            <button onclick="switchView('inventori')" class="nav-btn w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-slate-400"><i class="fa-solid fa-boxes-stacked w-5"></i><span>Stok</span></button>
-            <button onclick="switchView('laporan')" class="nav-btn w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-slate-400"><i class="fa-solid fa-chart-line w-5"></i><span>Laporan</span></button>
-            <button onclick="switchView('pengaturan')" class="nav-btn w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl hover:bg-slate-800 text-slate-400"><i class="fa-solid fa-gear w-5"></i><span>Pengaturan</span></button>
-        </nav>
-        <div class="mt-auto pt-4 border-t border-slate-800">
-            <button onclick="handleLogout()" class="w-full text-center text-sm font-semibold text-rose-400 bg-rose-500/10 py-2 rounded-xl"><i class="fa-solid fa-sign-out-alt mr-1"></i> Keluar</button>
-        </div>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="flex-1 p-6 md:p-8">
-        <div class="bg-white p-6 rounded-2xl shadow-sm border mb-6">
-            <h2 class="text-xl font-bold" id="view-title">Dashboard</h2>
-            <p class="text-slate-500 text-sm" id="view-desc">Ringkasan toko hari ini</p>
-        </div>
-
-        <div id="view-dashboard" class="view-content">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="bg-white p-5 rounded-2xl shadow-sm border"><p class="text-slate-400 text-sm">Total Penjualan</p><p class="text-2xl font-bold" id="total-penjualan">Rp 0</p></div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border"><p class="text-slate-400 text-sm">Saldo Kas</p><p class="text-2xl font-bold" id="saldo-kas">Rp 0</p></div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border"><p class="text-slate-400 text-sm">Total Stok</p><p class="text-2xl font-bold" id="total-stok">0 Unit</p></div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border"><p class="text-slate-400 text-sm">Kredit Aktif</p><p class="text-2xl font-bold" id="kredit-aktif">0</p></div>
+<!-- APLIKASI UTAMA -->
+<div id="main-app" class="hidden flex min-h-screen">
+    <!-- SIDEBAR -->
+    <div class="w-64 bg-slate-900 text-slate-300 flex-shrink-0 min-h-screen p-4">
+        <div class="flex items-center gap-3 mb-8 pb-4 border-b border-slate-700">
+            <i class="fa-solid fa-store text-2xl text-cyan-400"></i>
+            <div>
+                <h1 class="font-bold text-white">Konter Pro</h1>
+                <p class="text-xs text-cyan-400">v3.0</p>
             </div>
         </div>
+        <nav class="space-y-2">
+            <div onclick="changePage('dashboard')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-chart-line w-5"></i> Dashboard
+            </div>
+            <div onclick="changePage('kasir')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-cash-register w-5"></i> Kasir
+            </div>
+            <div onclick="changePage('riwayat')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-clock-rotate-left w-5"></i> Riwayat
+            </div>
+            <div onclick="changePage('kredit')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-credit-card w-5"></i> Kredit
+            </div>
+            <div onclick="changePage('stok')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-boxes-stacked w-5"></i> Stok Barang
+            </div>
+            <div onclick="changePage('laporan')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-chart-simple w-5"></i> Laporan
+            </div>
+            <div onclick="changePage('pengaturan')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-gear w-5"></i> Pengaturan
+            </div>
+        </nav>
+        <div class="absolute bottom-4 w-52">
+            <button onclick="logout()" class="w-full bg-red-500/20 text-red-400 p-2 rounded-xl text-sm hover:bg-red-500/30">
+                <i class="fa-solid fa-sign-out-alt mr-2"></i> Keluar
+            </button>
+        </div>
+    </div>
 
-        <div id="view-transaksi" class="view-content hidden"><div class="bg-white p-6 rounded-2xl shadow-sm border"><p class="text-slate-500">Form transaksi kasir akan muncul di sini.</p></div></div>
-        <div id="view-riwayat" class="view-content hidden"><div class="bg-white p-6 rounded-2xl shadow-sm border"><p class="text-slate-500">Riwayat transaksi akan muncul di sini.</p></div></div>
-        <div id="view-kredit" class="view-content hidden"><div class="bg-white p-6 rounded-2xl shadow-sm border"><p class="text-slate-500">Data kredit pelanggan akan muncul di sini.</p></div></div>
-        <div id="view-inventori" class="view-content hidden"><div class="bg-white p-6 rounded-2xl shadow-sm border"><p class="text-slate-500">Manajemen stok HP & aksesoris akan muncul di sini.</p></div></div>
-        <div id="view-laporan" class="view-content hidden"><div class="bg-white p-6 rounded-2xl shadow-sm border"><p class="text-slate-500">Laporan keuangan akan muncul di sini.</p></div></div>
-        <div id="view-pengaturan" class="view-content hidden"><div class="bg-white p-6 rounded-2xl shadow-sm border"><p class="text-slate-500">Pengaturan sistem akan muncul di sini.</p></div></div>
-    </main>
+    <!-- KONTEN UTAMA -->
+    <div class="flex-1 p-6 overflow-auto">
+        <div id="page-container" class="bg-white rounded-2xl shadow-sm p-6 min-h-[500px]">
+            <!-- Isi akan berubah sesuai menu yang dipilih -->
+        </div>
+    </div>
 </div>
 
 <script>
-    // ==================== FUNGSI LOGIN ====================
-    function handleLogin(event) {
-        event.preventDefault();
-        const username = document.getElementById('login-username').value;
-        const password = document.getElementById('login-password').value;
-        
-        if (username === 'admin' && password === 'admin') {
+    // ==================== LOGIN ====================
+    function handleLogin(e) {
+        e.preventDefault();
+        const user = document.getElementById('login-user').value;
+        const pass = document.getElementById('login-pass').value;
+        if (user === 'admin' && pass === 'admin') {
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('main-app').classList.remove('hidden');
-            loadDashboardData();
+            changePage('dashboard');
         } else {
-            alert('Username atau password salah!\nGunakan: admin / admin');
+            alert('Login gagal! Gunakan admin / admin');
         }
     }
 
-    function handleLogout() {
+    function logout() {
         document.getElementById('login-screen').style.display = 'flex';
         document.getElementById('main-app').classList.add('hidden');
-        document.getElementById('login-username').value = '';
-        document.getElementById('login-password').value = '';
     }
 
-    function switchView(view) {
-        document.querySelectorAll('.view-content').forEach(el => el.classList.add('hidden'));
-        document.getElementById(`view-${view}`).classList.remove('hidden');
+    // ==================== FUNGSI GANTI HALAMAN ====================
+    function changePage(page) {
+        // Update active style sidebar
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.classList.remove('bg-slate-800', 'text-white');
+            item.classList.add('text-slate-400');
+        });
+        event.currentTarget.classList.add('bg-slate-800', 'text-white');
+        event.currentTarget.classList.remove('text-slate-400');
+
+        const container = document.getElementById('page-container');
         
-        const titles = { dashboard:'Dashboard', transaksi:'Kasir', riwayat:'Riwayat', kredit:'Kredit', inventori:'Stok', laporan:'Laporan', pengaturan:'Pengaturan' };
-        document.getElementById('view-title').innerText = titles[view] || view;
-        
-        if (view === 'dashboard') loadDashboardData();
+        if (page === 'dashboard') {
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">📊 Dashboard</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-cyan-50 p-4 rounded-xl"><p class="text-slate-500">Penjualan Hari Ini</p><p class="text-2xl font-bold">Rp 0</p></div>
+                    <div class="bg-green-50 p-4 rounded-xl"><p class="text-slate-500">Saldo Kas</p><p class="text-2xl font-bold">Rp 0</p></div>
+                    <div class="bg-purple-50 p-4 rounded-xl"><p class="text-slate-500">Total Stok</p><p class="text-2xl font-bold">0 Unit</p></div>
+                </div>
+                <p class="text-slate-400 text-sm">✨ Dashboard akan menampilkan ringkasan penjualan, stok, dan kredit setelah data diisi.</p>
+            `;
+        } 
+        else if (page === 'kasir') {
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">🧾 Kasir / Transaksi</h2>
+                <div class="bg-slate-100 p-4 rounded-xl mb-4">
+                    <p class="font-semibold">Pilih Produk:</p>
+                    <select class="w-full p-2 border rounded mt-2">
+                        <option>iPhone 14 - Rp 12.000.000</option>
+                        <option>Samsung A54 - Rp 5.500.000</option>
+                        <option>Charger 20W - Rp 150.000</option>
+                    </select>
+                    <input type="number" placeholder="Jumlah" class="w-full p-2 border rounded mt-2">
+                    <button class="bg-cyan-600 text-white px-4 py-2 rounded mt-3">Tambah ke Keranjang</button>
+                </div>
+                <p class="text-slate-400 text-sm">📌 Fitur kasir lengkap akan aktif setelah data stok diisi.</p>
+            `;
+        }
+        else if (page === 'riwayat') {
+            container.innerHTML = `<h2 class="text-2xl font-bold mb-4">📜 Riwayat Transaksi</h2><p class="text-slate-400">Belum ada transaksi. Mulai transaksi dari menu Kasir.</p>`;
+        }
+        else if (page === 'kredit') {
+            container.innerHTML = `<h2 class="text-2xl font-bold mb-4">💳 Manajemen Kredit Pelanggan</h2><p class="text-slate-400">Data kredit akan muncul setelah ada transaksi kredit.</p>`;
+        }
+        else if (page === 'stok') {
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">📦 Stok Barang</h2>
+                <button class="bg-green-600 text-white px-4 py-2 rounded mb-4" onclick="tambahStok()">+ Tambah Barang</button>
+                <div id="stok-list" class="space-y-2">
+                    <p class="text-slate-400">Belum ada data stok. Klik "Tambah Barang".</p>
+                </div>
+            `;
+        }
+        else if (page === 'laporan') {
+            container.innerHTML = `<h2 class="text-2xl font-bold mb-4">📈 Laporan Keuangan</h2><p class="text-slate-400">Laporan laba rugi dan arus kas akan muncul setelah ada transaksi.</p>`;
+        }
+        else if (page === 'pengaturan') {
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">⚙️ Pengaturan</h2>
+                <label class="block mb-2">Nama Toko:</label>
+                <input type="text" id="nama-toko" value="Konter HP & CC" class="border p-2 rounded w-full mb-4">
+                <button class="bg-blue-600 text-white px-4 py-2 rounded" onclick="simpanPengaturan()">Simpan</button>
+            `;
+        }
     }
 
-    function loadDashboardData() {
-        // Data contoh (nanti bisa disambung ke localStorage atau database)
-        document.getElementById('total-penjualan').innerText = 'Rp 2.450.000';
-        document.getElementById('saldo-kas').innerText = 'Rp 12.800.000';
-        document.getElementById('total-stok').innerText = '86 Unit';
-        document.getElementById('kredit-aktif').innerText = '12';
-    }
-
-    // Tampilkan dashboard default
-    switchView('dashboard');
+    // Fungsi tambahan untuk stok & pengaturan (demo)
+    window.tambahStok = function() {
+        alert('Fitur tambah stok akan segera hadir. Isi data stok secara manual nanti.');
+    };
+    window.simpanPengaturan = function() {
+        const namaToko = document.getElementById('nama-toko')?.value;
+        if (namaToko) alert('Nama toko tersimpan: ' + namaToko);
+    };
 </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Manajemen Konter HP & Kredit Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-item.active { background-color: #1e293b; color: white; }
+        .sidebar-item { transition: all 0.2s ease; }
+    </style>
+</head>
+<body class="bg-slate-50">
 
+<!-- LAYAR LOGIN -->
+<div id="login-screen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl w-full max-w-md p-8 mx-4 shadow-2xl">
+        <div class="text-center mb-6">
+            <i class="fa-solid fa-store text-5xl text-cyan-500 mb-3"></i>
+            <h1 class="text-2xl font-bold">Konter HP & CC</h1>
+            <p class="text-sm text-slate-500">Sistem POS & Manajemen Kredit</p>
+        </div>
+        <form onsubmit="handleLogin(event)">
+            <input type="text" id="login-user" placeholder="Username" class="w-full p-3 border rounded-xl mb-3" required>
+            <input type="password" id="login-pass" placeholder="Password" class="w-full p-3 border rounded-xl mb-4" required>
+            <button class="w-full bg-slate-800 text-white p-3 rounded-xl font-semibold">Login</button>
+        </form>
+        <p class="text-center text-xs text-slate-400 mt-4">Username: admin | Password: admin</p>
+    </div>
+</div>
+
+<!-- APLIKASI UTAMA -->
+<div id="main-app" class="hidden flex min-h-screen">
+    <!-- SIDEBAR -->
+    <div class="w-64 bg-slate-900 text-slate-300 flex-shrink-0 min-h-screen p-4">
+        <div class="flex items-center gap-3 mb-8 pb-4 border-b border-slate-700">
+            <i class="fa-solid fa-store text-2xl text-cyan-400"></i>
+            <div>
+                <h1 class="font-bold text-white">Konter Pro</h1>
+                <p class="text-xs text-cyan-400">v3.0</p>
+            </div>
+        </div>
+        <nav class="space-y-2">
+            <div onclick="changePage('dashboard')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-chart-line w-5"></i> Dashboard
+            </div>
+            <div onclick="changePage('kasir')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-cash-register w-5"></i> Kasir
+            </div>
+            <div onclick="changePage('riwayat')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-clock-rotate-left w-5"></i> Riwayat
+            </div>
+            <div onclick="changePage('kredit')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-credit-card w-5"></i> Kredit
+            </div>
+            <div onclick="changePage('stok')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-boxes-stacked w-5"></i> Stok Barang
+            </div>
+            <div onclick="changePage('laporan')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-chart-simple w-5"></i> Laporan
+            </div>
+            <div onclick="changePage('pengaturan')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-gear w-5"></i> Pengaturan
+            </div>
+        </nav>
+        <div class="absolute bottom-4 w-52">
+            <button onclick="logout()" class="w-full bg-red-500/20 text-red-400 p-2 rounded-xl text-sm hover:bg-red-500/30">
+                <i class="fa-solid fa-sign-out-alt mr-2"></i> Keluar
+            </button>
+        </div>
+    </div>
+
+    <!-- KONTEN UTAMA -->
+    <div class="flex-1 p-6 overflow-auto">
+        <div id="page-container" class="bg-white rounded-2xl shadow-sm p-6 min-h-[500px]">
+            <!-- Isi akan berubah sesuai menu yang dipilih -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== LOGIN ====================
+    function handleLogin(e) {
+        e.preventDefault();
+        const user = document.getElementById('login-user').value;
+        const pass = document.getElementById('login-pass').value;
+        if (user === 'admin' && pass === 'admin') {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-app').classList.remove('hidden');
+            changePage('dashboard');
+        } else {
+            alert('Login gagal! Gunakan admin / admin');
+        }
+    }
+
+    function logout() {
+        document.getElementById('login-screen').style.display = 'flex';
+        document.getElementById('main-app').classList.add('hidden');
+    }
+
+    // ==================== FUNGSI GANTI HALAMAN ====================
+    function changePage(page) {
+        // Update active style sidebar
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.classList.remove('bg-slate-800', 'text-white');
+            item.classList.add('text-slate-400');
+        });
+        event.currentTarget.classList.add('bg-slate-800', 'text-white');
+        event.currentTarget.classList.remove('text-slate-400');
+
+        const container = document.getElementById('page-container');
+        
+        if (page === 'dashboard') {
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">📊 Dashboard</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-cyan-50 p-4 rounded-xl"><p class="text-slate-500">Penjualan Hari Ini</p><p class="text-2xl font-bold">Rp 0</p></div>
+                    <div class="bg-green-50 p-4 rounded-xl"><p class="text-slate-500">Saldo Kas</p><p class="text-2xl font-bold">Rp 0</p></div>
+                    <div class="bg-purple-50 p-4 rounded-xl"><p class="text-slate-500">Total Stok</p><p class="text-2xl font-bold">0 Unit</p></div>
+                </div>
+                <p class="text-slate-400 text-sm">✨ Dashboard akan menampilkan ringkasan penjualan, stok, dan kredit setelah data diisi.</p>
+            `;
+        } 
+        else if (page === 'kasir') {
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">🧾 Kasir / Transaksi</h2>
+                <div class="bg-slate-100 p-4 rounded-xl mb-4">
+                    <p class="font-semibold">Pilih Produk:</p>
+                    <select class="w-full p-2 border rounded mt-2">
+                        <option>iPhone 14 - Rp 12.000.000</option>
+                        <option>Samsung A54 - Rp 5.500.000</option>
+                        <option>Charger 20W - Rp 150.000</option>
+                    </select>
+                    <input type="number" placeholder="Jumlah" class="w-full p-2 border rounded mt-2">
+                    <button class="bg-cyan-600 text-white px-4 py-2 rounded mt-3">Tambah ke Keranjang</button>
+                </div>
+                <p class="text-slate-400 text-sm">📌 Fitur kasir lengkap akan aktif setelah data stok diisi.</p>
+            `;
+        }
+        else if (page === 'riwayat') {
+            container.innerHTML = `<h2 class="text-2xl font-bold mb-4">📜 Riwayat Transaksi</h2><p class="text-slate-400">Belum ada transaksi. Mulai transaksi dari menu Kasir.</p>`;
+        }
+        else if (page === 'kredit') {
+            container.innerHTML = `<h2 class="text-2xl font-bold mb-4">💳 Manajemen Kredit Pelanggan</h2><p class="text-slate-400">Data kredit akan muncul setelah ada transaksi kredit.</p>`;
+        }
+        else if (page === 'stok') {
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">📦 Stok Barang</h2>
+                <button class="bg-green-600 text-white px-4 py-2 rounded mb-4" onclick="tambahStok()">+ Tambah Barang</button>
+                <div id="stok-list" class="space-y-2">
+                    <p class="text-slate-400">Belum ada data stok. Klik "Tambah Barang".</p>
+                </div>
+            `;
+        }
+        else if (page === 'laporan') {
+            container.innerHTML = `<h2 class="text-2xl font-bold mb-4">📈 Laporan Keuangan</h2><p class="text-slate-400">Laporan laba rugi dan arus kas akan muncul setelah ada transaksi.</p>`;
+        }
+        else if (page === 'pengaturan') {
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">⚙️ Pengaturan</h2>
+                <label class="block mb-2">Nama Toko:</label>
+                <input type="text" id="nama-toko" value="Konter HP & CC" class="border p-2 rounded w-full mb-4">
+                <button class="bg-blue-600 text-white px-4 py-2 rounded" onclick="simpanPengaturan()">Simpan</button>
+            `;
+        }
+    }
+
+    // Fungsi tambahan untuk stok & pengaturan (demo)
+    window.tambahStok = function() {
+        alert('Fitur tambah stok akan segera hadir. Isi data stok secara manual nanti.');
+    };
+    window.simpanPengaturan = function() {
+        const namaToko = document.getElementById('nama-toko')?.value;
+        if (namaToko) alert('Nama toko tersimpan: ' + namaToko);
+    };
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Manajemen Konter HP & Kredit Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-item.active { background-color: #1e293b; color: white; }
+        .sidebar-item { transition: all 0.2s ease; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+<!-- LAYAR LOGIN -->
+<div id="login-screen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl w-full max-w-md p-8 mx-4 shadow-2xl">
+        <div class="text-center mb-6">
+            <i class="fa-solid fa-store text-5xl text-cyan-500 mb-3"></i>
+            <h1 class="text-2xl font-bold">Konter HP & CC</h1>
+            <p class="text-sm text-slate-500">Sistem POS & Manajemen Kredit</p>
+        </div>
+        <form onsubmit="handleLogin(event)">
+            <input type="text" id="login-user" placeholder="Username" class="w-full p-3 border rounded-xl mb-3" required>
+            <input type="password" id="login-pass" placeholder="Password" class="w-full p-3 border rounded-xl mb-4" required>
+            <button class="w-full bg-slate-800 text-white p-3 rounded-xl font-semibold">Login</button>
+        </form>
+        <p class="text-center text-xs text-slate-400 mt-4">Username: admin | Password: admin</p>
+    </div>
+</div>
+
+<!-- APLIKASI UTAMA -->
+<div id="main-app" class="hidden flex min-h-screen">
+    <!-- SIDEBAR -->
+    <div class="w-64 bg-slate-900 text-slate-300 flex-shrink-0 min-h-screen p-4">
+        <div class="flex items-center gap-3 mb-8 pb-4 border-b border-slate-700">
+            <i class="fa-solid fa-store text-2xl text-cyan-400"></i>
+            <div>
+                <h1 class="font-bold text-white">Konter Pro</h1>
+                <p class="text-xs text-cyan-400">v3.0</p>
+            </div>
+        </div>
+        <nav class="space-y-2">
+            <div onclick="changePage('dashboard')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-chart-line w-5"></i> Dashboard
+            </div>
+            <div onclick="changePage('kasir')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-cash-register w-5"></i> Kasir
+            </div>
+            <div onclick="changePage('riwayat')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-clock-rotate-left w-5"></i> Riwayat
+            </div>
+            <div onclick="changePage('kredit')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-credit-card w-5"></i> Kredit
+            </div>
+            <div onclick="changePage('stok')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-boxes-stacked w-5"></i> Stok Barang
+            </div>
+            <div onclick="changePage('laporan')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-chart-simple w-5"></i> Laporan
+            </div>
+            <div onclick="changePage('pengaturan')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-gear w-5"></i> Pengaturan
+            </div>
+        </nav>
+        <div class="absolute bottom-4 w-52">
+            <button onclick="logout()" class="w-full bg-red-500/20 text-red-400 p-2 rounded-xl text-sm hover:bg-red-500/30">
+                <i class="fa-solid fa-sign-out-alt mr-2"></i> Keluar
+            </button>
+        </div>
+    </div>
+
+    <!-- KONTEN UTAMA -->
+    <div class="flex-1 p-6 overflow-auto">
+        <div id="page-container" class="bg-white rounded-2xl shadow-sm p-6 min-h-[500px]">
+            <!-- Isi akan berubah sesuai menu yang dipilih -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== LOGIN ====================
+    function handleLogin(e) {
+        e.preventDefault();
+        const user = document.getElementById('login-user').value;
+        const pass = document.getElementById('login-pass').value;
+        if (user === 'admin' && pass === 'admin') {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-app').classList.remove('hidden');
+            changePage('dashboard');
+        } else {
+            alert('Login gagal! Gunakan admin / admin');
+        }
+    }
+
+    function logout() {
+        document.getElementById('login-screen').style.display = 'flex';
+        document.getElementById('main-app').classList.add('hidden');
+    }
+
+    // ==================== FUNGSI GANTI HALAMAN ====================
+    function changePage(page) {
+        // Update active style sidebar
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.classList.remove('bg-slate-800', 'text-white');
+            item.classList.add('text-slate-400');
+        });
+        event.currentTarget.classList.add('bg-slate-800', 'text-white');
+        event.currentTarget.classList.remove('text-slate-400');
+
+        const container = document.getElementById('page-container');
+        
+        if (page === 'dashboard') {
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">📊 Dashboard</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-cyan-50 p-4 rounded-xl"><p class="text-slate-500">Penjualan Hari Ini</p><p class="text-2xl font-bold">Rp 0</p></div>
+                    <div class="bg-green-50 p-4 rounded-xl"><p class="text-slate-500">Saldo Kas</p><p class="text-2xl font-bold">Rp 0</p></div>
+                    <div class="bg-purple-50 p-4 rounded-xl"><p class="text-slate-500">Total Stok</p><p class="text-2xl font-bold">0 Unit</p></div>
+                </div>
+                <p class="text-slate-400 text-sm">✨ Dashboard akan menampilkan ringkasan penjualan, stok, dan kredit setelah data diisi.</p>
+            `;
+        } 
+        else if (page === 'kasir') {
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">🧾 Kasir / Transaksi</h2>
+                <div class="bg-slate-100 p-4 rounded-xl mb-4">
+                    <p class="font-semibold">Pilih Produk:</p>
+                    <select class="w-full p-2 border rounded mt-2">
+                        <option>iPhone 14 - Rp 12.000.000</option>
+                        <option>Samsung A54 - Rp 5.500.000</option>
+                        <option>Charger 20W - Rp 150.000</option>
+                    </select>
+                    <input type="number" placeholder="Jumlah" class="w-full p-2 border rounded mt-2">
+                    <button class="bg-cyan-600 text-white px-4 py-2 rounded mt-3">Tambah ke Keranjang</button>
+                </div>
+                <p class="text-slate-400 text-sm">📌 Fitur kasir lengkap akan aktif setelah data stok diisi.</p>
+            `;
+        }
+        else if (page === 'riwayat') {
+            container.innerHTML = `<h2 class="text-2xl font-bold mb-4">📜 Riwayat Transaksi</h2><p class="text-slate-400">Belum ada transaksi. Mulai transaksi dari menu Kasir.</p>`;
+        }
+        else if (page === 'kredit') {
+            container.innerHTML = `<h2 class="text-2xl font-bold mb-4">💳 Manajemen Kredit Pelanggan</h2><p class="text-slate-400">Data kredit akan muncul setelah ada transaksi kredit.</p>`;
+        }
+        else if (page === 'stok') {
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">📦 Stok Barang</h2>
+                <button class="bg-green-600 text-white px-4 py-2 rounded mb-4" onclick="tambahStok()">+ Tambah Barang</button>
+                <div id="stok-list" class="space-y-2">
+                    <p class="text-slate-400">Belum ada data stok. Klik "Tambah Barang".</p>
+                </div>
+            `;
+        }
+        else if (page === 'laporan') {
+            container.innerHTML = `<h2 class="text-2xl font-bold mb-4">📈 Laporan Keuangan</h2><p class="text-slate-400">Laporan laba rugi dan arus kas akan muncul setelah ada transaksi.</p>`;
+        }
+        else if (page === 'pengaturan') {
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">⚙️ Pengaturan</h2>
+                <label class="block mb-2">Nama Toko:</label>
+                <input type="text" id="nama-toko" value="Konter HP & CC" class="border p-2 rounded w-full mb-4">
+                <button class="bg-blue-600 text-white px-4 py-2 rounded" onclick="simpanPengaturan()">Simpan</button>
+            `;
+        }
+    }
+
+    // Fungsi tambahan untuk stok & pengaturan (demo)
+    window.tambahStok = function() {
+        alert('Fitur tambah stok akan segera hadir. Isi data stok secara manual nanti.');
+    };
+    window.simpanPengaturan = function() {
+        const namaToko = document.getElementById('nama-toko')?.value;
+        if (namaToko) alert('Nama toko tersimpan: ' + namaToko);
+    };
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Manajemen Konter HP & Kredit Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-item.active { background-color: #1e293b; color: white; }
+        .sidebar-item { transition: all 0.2s ease; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+<!-- LAYAR LOGIN -->
+<div id="login-screen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl w-full max-w-md p-8 mx-4 shadow-2xl">
+        <div class="text-center mb-6">
+            <i class="fa-solid fa-store text-5xl text-cyan-500 mb-3"></i>
+            <h1 class="text-2xl font-bold">Konter HP & CC</h1>
+            <p class="text-sm text-slate-500">Sistem POS & Manajemen Kredit</p>
+        </div>
+        <form onsubmit="handleLogin(event)">
+            <input type="text" id="login-user" placeholder="Username" class="w-full p-3 border rounded-xl mb-3" required>
+            <input type="password" id="login-pass" placeholder="Password" class="w-full p-3 border rounded-xl mb-4" required>
+            <button class="w-full bg-slate-800 text-white p-3 rounded-xl font-semibold">Login</button>
+        </form>
+        <p class="text-center text-xs text-slate-400 mt-4">Username: admin | Password: admin</p>
+    </div>
+</div>
+
+<!-- APLIKASI UTAMA -->
+<div id="main-app" class="hidden flex min-h-screen">
+    <!-- SIDEBAR -->
+    <div class="w-64 bg-slate-900 text-slate-300 flex-shrink-0 min-h-screen p-4">
+        <div class="flex items-center gap-3 mb-8 pb-4 border-b border-slate-700">
+            <i class="fa-solid fa-store text-2xl text-cyan-400"></i>
+            <div>
+                <h1 class="font-bold text-white">Konter Pro</h1>
+                <p class="text-xs text-cyan-400">v3.0</p>
+            </div>
+        </div>
+        <nav class="space-y-2">
+            <div onclick="changePage('dashboard')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-chart-line w-5"></i> Dashboard
+            </div>
+            <div onclick="changePage('kasir')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-cash-register w-5"></i> Kasir
+            </div>
+            <div onclick="changePage('riwayat')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-clock-rotate-left w-5"></i> Riwayat
+            </div>
+            <div onclick="changePage('kredit')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-credit-card w-5"></i> Kredit
+            </div>
+            <div onclick="changePage('stok')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-boxes-stacked w-5"></i> Stok Barang
+            </div>
+            <div onclick="changePage('laporan')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-chart-simple w-5"></i> Laporan
+            </div>
+            <div onclick="changePage('pengaturan')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-gear w-5"></i> Pengaturan
+            </div>
+        </nav>
+        <div class="absolute bottom-4 w-52">
+            <button onclick="logout()" class="w-full bg-red-500/20 text-red-400 p-2 rounded-xl text-sm hover:bg-red-500/30">
+                <i class="fa-solid fa-sign-out-alt mr-2"></i> Keluar
+            </button>
+        </div>
+    </div>
+
+    <!-- KONTEN UTAMA -->
+    <div class="flex-1 p-6 overflow-auto">
+        <div id="page-container" class="bg-white rounded-2xl shadow-sm p-6 min-h-[500px]">
+            <!-- Isi akan berubah sesuai menu yang dipilih -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== LOGIN ====================
+    function handleLogin(e) {
+        e.preventDefault();
+        const user = document.getElementById('login-user').value;
+        const pass = document.getElementById('login-pass').value;
+        if (user === 'admin' && pass === 'admin') {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-app').classList.remove('hidden');
+            changePage('dashboard');
+        } else {
+            alert('Login gagal! Gunakan admin / admin');
+        }
+    }
+
+    function logout() {
+        document.getElementById('login-screen').style.display = 'flex';
+        document.getElementById('main-app').classList.add('hidden');
+    }
+
+    // ==================== FUNGSI GANTI HALAMAN ====================
+    function changePage(page) {
+        // Update active style sidebar
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.classList.remove('bg-slate-800', 'text-white');
+            item.classList.add('text-slate-400');
+        });
+        event.currentTarget.classList.add('bg-slate-800', 'text-white');
+        event.currentTarget.classList.remove('text-slate-400');
+
+        const container = document.getElementById('page-container');
+        
+        if (page === 'dashboard') {
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">📊 Dashboard</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-cyan-50 p-4 rounded-xl"><p class="text-slate-500">Penjualan Hari Ini</p><p class="text-2xl font-bold">Rp 0</p></div>
+                    <div class="bg-green-50 p-4 rounded-xl"><p class="text-slate-500">Saldo Kas</p><p class="text-2xl font-bold">Rp 0</p></div>
+                    <div class="bg-purple-50 p-4 rounded-xl"><p class="text-slate-500">Total Stok</p><p class="text-2xl font-bold">0 Unit</p></div>
+                </div>
+                <p class="text-slate-400 text-sm">✨ Dashboard akan menampilkan ringkasan penjualan, stok, dan kredit setelah data diisi.</p>
+            `;
+        } 
+        else if (page === 'kasir') {
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">🧾 Kasir / Transaksi</h2>
+                <div class="bg-slate-100 p-4 rounded-xl mb-4">
+                    <p class="font-semibold">Pilih Produk:</p>
+                    <select class="w-full p-2 border rounded mt-2">
+                        <option>iPhone 14 - Rp 12.000.000</option>
+                        <option>Samsung A54 - Rp 5.500.000</option>
+                        <option>Charger 20W - Rp 150.000</option>
+                    </select>
+                    <input type="number" placeholder="Jumlah" class="w-full p-2 border rounded mt-2">
+                    <button class="bg-cyan-600 text-white px-4 py-2 rounded mt-3">Tambah ke Keranjang</button>
+                </div>
+                <p class="text-slate-400 text-sm">📌 Fitur kasir lengkap akan aktif setelah data stok diisi.</p>
+            `;
+        }
+        else if (page === 'riwayat') {
+            container.innerHTML = `<h2 class="text-2xl font-bold mb-4">📜 Riwayat Transaksi</h2><p class="text-slate-400">Belum ada transaksi. Mulai transaksi dari menu Kasir.</p>`;
+        }
+        else if (page === 'kredit') {
+            container.innerHTML = `<h2 class="text-2xl font-bold mb-4">💳 Manajemen Kredit Pelanggan</h2><p class="text-slate-400">Data kredit akan muncul setelah ada transaksi kredit.</p>`;
+        }
+        else if (page === 'stok') {
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">📦 Stok Barang</h2>
+                <button class="bg-green-600 text-white px-4 py-2 rounded mb-4" onclick="tambahStok()">+ Tambah Barang</button>
+                <div id="stok-list" class="space-y-2">
+                    <p class="text-slate-400">Belum ada data stok. Klik "Tambah Barang".</p>
+                </div>
+            `;
+        }
+        else if (page === 'laporan') {
+            container.innerHTML = `<h2 class="text-2xl font-bold mb-4">📈 Laporan Keuangan</h2><p class="text-slate-400">Laporan laba rugi dan arus kas akan muncul setelah ada transaksi.</p>`;
+        }
+        else if (page === 'pengaturan') {
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">⚙️ Pengaturan</h2>
+                <label class="block mb-2">Nama Toko:</label>
+                <input type="text" id="nama-toko" value="Konter HP & CC" class="border p-2 rounded w-full mb-4">
+                <button class="bg-blue-600 text-white px-4 py-2 rounded" onclick="simpanPengaturan()">Simpan</button>
+            `;
+        }
+    }
+
+    // Fungsi tambahan untuk stok & pengaturan (demo)
+    window.tambahStok = function() {
+        alert('Fitur tambah stok akan segera hadir. Isi data stok secara manual nanti.');
+    };
+    window.simpanPengaturan = function() {
+        const namaToko = document.getElementById('nama-toko')?.value;
+        if (namaToko) alert('Nama toko tersimpan: ' + namaToko);
+    };
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Manajemen Konter HP & Kredit Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-item.active { background-color: #1e293b; color: white; }
+        .sidebar-item { transition: all 0.2s ease; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+<!-- LAYAR LOGIN -->
+<div id="login-screen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl w-full max-w-md p-8 mx-4 shadow-2xl">
+        <div class="text-center mb-6">
+            <i class="fa-solid fa-store text-5xl text-cyan-500 mb-3"></i>
+            <h1 class="text-2xl font-bold">Konter HP & CC</h1>
+            <p class="text-sm text-slate-500">Sistem POS & Manajemen Kredit</p>
+        </div>
+        <form onsubmit="handleLogin(event)">
+            <input type="text" id="login-user" placeholder="Username" class="w-full p-3 border rounded-xl mb-3" required>
+            <input type="password" id="login-pass" placeholder="Password" class="w-full p-3 border rounded-xl mb-4" required>
+            <button class="w-full bg-slate-800 text-white p-3 rounded-xl font-semibold">Login</button>
+        </form>
+        <p class="text-center text-xs text-slate-400 mt-4">Username: admin | Password: admin</p>
+    </div>
+</div>
+
+<!-- APLIKASI UTAMA -->
+<div id="main-app" class="hidden flex min-h-screen">
+    <!-- SIDEBAR -->
+    <div class="w-64 bg-slate-900 text-slate-300 flex-shrink-0 min-h-screen p-4">
+        <div class="flex items-center gap-3 mb-8 pb-4 border-b border-slate-700">
+            <i class="fa-solid fa-store text-2xl text-cyan-400"></i>
+            <div>
+                <h1 class="font-bold text-white">Konter Pro</h1>
+                <p class="text-xs text-cyan-400">v3.0</p>
+            </div>
+        </div>
+        <nav class="space-y-2">
+            <div onclick="changePage('dashboard')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-chart-line w-5"></i> Dashboard
+            </div>
+            <div onclick="changePage('kasir')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-cash-register w-5"></i> Kasir
+            </div>
+            <div onclick="changePage('riwayat')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-clock-rotate-left w-5"></i> Riwayat
+            </div>
+            <div onclick="changePage('kredit')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-credit-card w-5"></i> Kredit
+            </div>
+            <div onclick="changePage('stok')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-boxes-stacked w-5"></i> Stok Barang
+            </div>
+            <div onclick="changePage('laporan')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-chart-simple w-5"></i> Laporan
+            </div>
+            <div onclick="changePage('pengaturan')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-gear w-5"></i> Pengaturan
+            </div>
+        </nav>
+        <div class="absolute bottom-4 w-52">
+            <button onclick="logout()" class="w-full bg-red-500/20 text-red-400 p-2 rounded-xl text-sm hover:bg-red-500/30">
+                <i class="fa-solid fa-sign-out-alt mr-2"></i> Keluar
+            </button>
+        </div>
+    </div>
+
+    <!-- KONTEN UTAMA -->
+    <div class="flex-1 p-6 overflow-auto">
+        <div id="page-container" class="bg-white rounded-2xl shadow-sm p-6 min-h-[500px]">
+            <!-- Isi akan berubah sesuai menu yang dipilih -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== LOGIN ====================
+    function handleLogin(e) {
+        e.preventDefault();
+        const user = document.getElementById('login-user').value;
+        const pass = document.getElementById('login-pass').value;
+        if (user === 'admin' && pass === 'admin') {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-app').classList.remove('hidden');
+            changePage('dashboard');
+        } else {
+            alert('Login gagal! Gunakan admin / admin');
+        }
+    }
+
+    function logout() {
+        document.getElementById('login-screen').style.display = 'flex';
+        document.getElementById('main-app').classList.add('hidden');
+    }
+
+    // ==================== FUNGSI GANTI HALAMAN ====================
+    function changePage(page) {
+        // Update active style sidebar
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.classList.remove('bg-slate-800', 'text-white');
+            item.classList.add('text-slate-400');
+        });
+        event.currentTarget.classList.add('bg-slate-800', 'text-white');
+        event.currentTarget.classList.remove('text-slate-400');
+
+        const container = document.getElementById('page-container');
+        
+        if (page === 'dashboard') {
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">📊 Dashboard</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-cyan-50 p-4 rounded-xl"><p class="text-slate-500">Penjualan Hari Ini</p><p class="text-2xl font-bold">Rp 0</p></div>
+                    <div class="bg-green-50 p-4 rounded-xl"><p class="text-slate-500">Saldo Kas</p><p class="text-2xl font-bold">Rp 0</p></div>
+                    <div class="bg-purple-50 p-4 rounded-xl"><p class="text-slate-500">Total Stok</p><p class="text-2xl font-bold">0 Unit</p></div>
+                </div>
+                <p class="text-slate-400 text-sm">✨ Dashboard akan menampilkan ringkasan penjualan, stok, dan kredit setelah data diisi.</p>
+            `;
+        } 
+        else if (page === 'kasir') {
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">🧾 Kasir / Transaksi</h2>
+                <div class="bg-slate-100 p-4 rounded-xl mb-4">
+                    <p class="font-semibold">Pilih Produk:</p>
+                    <select class="w-full p-2 border rounded mt-2">
+                        <option>iPhone 14 - Rp 12.000.000</option>
+                        <option>Samsung A54 - Rp 5.500.000</option>
+                        <option>Charger 20W - Rp 150.000</option>
+                    </select>
+                    <input type="number" placeholder="Jumlah" class="w-full p-2 border rounded mt-2">
+                    <button class="bg-cyan-600 text-white px-4 py-2 rounded mt-3">Tambah ke Keranjang</button>
+                </div>
+                <p class="text-slate-400 text-sm">📌 Fitur kasir lengkap akan aktif setelah data stok diisi.</p>
+            `;
+        }
+        else if (page === 'riwayat') {
+            container.innerHTML = `<h2 class="text-2xl font-bold mb-4">📜 Riwayat Transaksi</h2><p class="text-slate-400">Belum ada transaksi. Mulai transaksi dari menu Kasir.</p>`;
+        }
+        else if (page === 'kredit') {
+            container.innerHTML = `<h2 class="text-2xl font-bold mb-4">💳 Manajemen Kredit Pelanggan</h2><p class="text-slate-400">Data kredit akan muncul setelah ada transaksi kredit.</p>`;
+        }
+        else if (page === 'stok') {
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">📦 Stok Barang</h2>
+                <button class="bg-green-600 text-white px-4 py-2 rounded mb-4" onclick="tambahStok()">+ Tambah Barang</button>
+                <div id="stok-list" class="space-y-2">
+                    <p class="text-slate-400">Belum ada data stok. Klik "Tambah Barang".</p>
+                </div>
+            `;
+        }
+        else if (page === 'laporan') {
+            container.innerHTML = `<h2 class="text-2xl font-bold mb-4">📈 Laporan Keuangan</h2><p class="text-slate-400">Laporan laba rugi dan arus kas akan muncul setelah ada transaksi.</p>`;
+        }
+        else if (page === 'pengaturan') {
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">⚙️ Pengaturan</h2>
+                <label class="block mb-2">Nama Toko:</label>
+                <input type="text" id="nama-toko" value="Konter HP & CC" class="border p-2 rounded w-full mb-4">
+                <button class="bg-blue-600 text-white px-4 py-2 rounded" onclick="simpanPengaturan()">Simpan</button>
+            `;
+        }
+    }
+
+    // Fungsi tambahan untuk stok & pengaturan (demo)
+    window.tambahStok = function() {
+        alert('Fitur tambah stok akan segera hadir. Isi data stok secara manual nanti.');
+    };
+    window.simpanPengaturan = function() {
+        const namaToko = document.getElementById('nama-toko')?.value;
+        if (namaToko) alert('Nama toko tersimpan: ' + namaToko);
+    };
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Manajemen Konter HP & Kredit Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-item.active { background-color: #1e293b; color: white; }
+        .sidebar-item { transition: all 0.2s ease; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+<!-- LAYAR LOGIN -->
+<div id="login-screen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl w-full max-w-md p-8 mx-4 shadow-2xl">
+        <div class="text-center mb-6">
+            <i class="fa-solid fa-store text-5xl text-cyan-500 mb-3"></i>
+            <h1 class="text-2xl font-bold">Konter HP & CC</h1>
+            <p class="text-sm text-slate-500">Sistem POS & Manajemen Kredit</p>
+        </div>
+        <form onsubmit="handleLogin(event)">
+            <input type="text" id="login-user" placeholder="Username" class="w-full p-3 border rounded-xl mb-3" required>
+            <input type="password" id="login-pass" placeholder="Password" class="w-full p-3 border rounded-xl mb-4" required>
+            <button class="w-full bg-slate-800 text-white p-3 rounded-xl font-semibold">Login</button>
+        </form>
+        <p class="text-center text-xs text-slate-400 mt-4">Username: admin | Password: admin</p>
+    </div>
+</div>
+
+<!-- APLIKASI UTAMA -->
+<div id="main-app" class="hidden flex min-h-screen">
+    <!-- SIDEBAR -->
+    <div class="w-64 bg-slate-900 text-slate-300 flex-shrink-0 min-h-screen p-4">
+        <div class="flex items-center gap-3 mb-8 pb-4 border-b border-slate-700">
+            <i class="fa-solid fa-store text-2xl text-cyan-400"></i>
+            <div>
+                <h1 class="font-bold text-white">Konter Pro</h1>
+                <p class="text-xs text-cyan-400">v3.0</p>
+            </div>
+        </div>
+        <nav class="space-y-2">
+            <div onclick="changePage('dashboard')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-chart-line w-5"></i> Dashboard
+            </div>
+            <div onclick="changePage('kasir')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-cash-register w-5"></i> Kasir
+            </div>
+            <div onclick="changePage('riwayat')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-clock-rotate-left w-5"></i> Riwayat
+            </div>
+            <div onclick="changePage('kredit')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-credit-card w-5"></i> Kredit
+            </div>
+            <div onclick="changePage('stok')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-boxes-stacked w-5"></i> Stok Barang
+            </div>
+            <div onclick="changePage('laporan')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-chart-simple w-5"></i> Laporan
+            </div>
+            <div onclick="changePage('pengaturan')" class="sidebar-item p-3 rounded-xl cursor-pointer flex items-center gap-3 hover:bg-slate-800">
+                <i class="fa-solid fa-gear w-5"></i> Pengaturan
+            </div>
+        </nav>
+        <div class="absolute bottom-4 w-52">
+            <button onclick="logout()" class="w-full bg-red-500/20 text-red-400 p-2 rounded-xl text-sm hover:bg-red-500/30">
+                <i class="fa-solid fa-sign-out-alt mr-2"></i> Keluar
+            </button>
+        </div>
+    </div>
+
+    <!-- KONTEN UTAMA -->
+    <div class="flex-1 p-6 overflow-auto">
+        <div id="page-container" class="bg-white rounded-2xl shadow-sm p-6 min-h-[500px]">
+            <!-- Isi akan berubah sesuai menu yang dipilih -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== LOGIN ====================
+    function handleLogin(e) {
+        e.preventDefault();
+        const user = document.getElementById('login-user').value;
+        const pass = document.getElementById('login-pass').value;
+        if (user === 'admin' && pass === 'admin') {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-app').classList.remove('hidden');
+            changePage('dashboard');
+        } else {
+            alert('Login gagal! Gunakan admin / admin');
+        }
+    }
+
+    function logout() {
+        document.getElementById('login-screen').style.display = 'flex';
+        document.getElementById('main-app').classList.add('hidden');
+    }
+
+    // ==================== FUNGSI GANTI HALAMAN ====================
+    function changePage(page) {
+        // Update active style sidebar
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.classList.remove('bg-slate-800', 'text-white');
+            item.classList.add('text-slate-400');
+        });
+        event.currentTarget.classList.add('bg-slate-800', 'text-white');
+        event.currentTarget.classList.remove('text-slate-400');
+
+        const container = document.getElementById('page-container');
+        
+        if (page === 'dashboard') {
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">📊 Dashboard</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-cyan-50 p-4 rounded-xl"><p class="text-slate-500">Penjualan Hari Ini</p><p class="text-2xl font-bold">Rp 0</p></div>
+                    <div class="bg-green-50 p-4 rounded-xl"><p class="text-slate-500">Saldo Kas</p><p class="text-2xl font-bold">Rp 0</p></div>
+                    <div class="bg-purple-50 p-4 rounded-xl"><p class="text-slate-500">Total Stok</p><p class="text-2xl font-bold">0 Unit</p></div>
+                </div>
+                <p class="text-slate-400 text-sm">✨ Dashboard akan menampilkan ringkasan penjualan, stok, dan kredit setelah data diisi.</p>
+            `;
+        } 
+        else if (page === 'kasir') {
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">🧾 Kasir / Transaksi</h2>
+                <div class="bg-slate-100 p-4 rounded-xl mb-4">
+                    <p class="font-semibold">Pilih Produk:</p>
+                    <select class="w-full p-2 border rounded mt-2">
+                        <option>iPhone 14 - Rp 12.000.000</option>
+                        <option>Samsung A54 - Rp 5.500.000</option>
+                        <option>Charger 20W - Rp 150.000</option>
+                    </select>
+                    <input type="number" placeholder="Jumlah" class="w-full p-2 border rounded mt-2">
+                    <button class="bg-cyan-600 text-white px-4 py-2 rounded mt-3">Tambah ke Keranjang</button>
+                </div>
+                <p class="text-slate-400 text-sm">📌 Fitur kasir lengkap akan aktif setelah data stok diisi.</p>
+            `;
+        }
+        else if (page === 'riwayat') {
+            container.innerHTML = `<h2 class="text-2xl font-bold mb-4">📜 Riwayat Transaksi</h2><p class="text-slate-400">Belum ada transaksi. Mulai transaksi dari menu Kasir.</p>`;
+        }
+        else if (page === 'kredit') {
+            container.innerHTML = `<h2 class="text-2xl font-bold mb-4">💳 Manajemen Kredit Pelanggan</h2><p class="text-slate-400">Data kredit akan muncul setelah ada transaksi kredit.</p>`;
+        }
+        else if (page === 'stok') {
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">📦 Stok Barang</h2>
+                <button class="bg-green-600 text-white px-4 py-2 rounded mb-4" onclick="tambahStok()">+ Tambah Barang</button>
+                <div id="stok-list" class="space-y-2">
+                    <p class="text-slate-400">Belum ada data stok. Klik "Tambah Barang".</p>
+                </div>
+            `;
+        }
+        else if (page === 'laporan') {
+            container.innerHTML = `<h2 class="text-2xl font-bold mb-4">📈 Laporan Keuangan</h2><p class="text-slate-400">Laporan laba rugi dan arus kas akan muncul setelah ada transaksi.</p>`;
+        }
+        else if (page === 'pengaturan') {
+            container.innerHTML = `
+                <h2 class="text-2xl font-bold mb-4">⚙️ Pengaturan</h2>
+                <label class="block mb-2">Nama Toko:</label>
+                <input type="text" id="nama-toko" value="Konter HP & CC" class="border p-2 rounded w-full mb-4">
+                <button class="bg-blue-600 text-white px-4 py-2 rounded" onclick="simpanPengaturan()">Simpan</button>
+            `;
+        }
+    }
+
+    // Fungsi tambahan untuk stok & pengaturan (demo)
+    window.tambahStok = function() {
+        alert('Fitur tambah stok akan segera hadir. Isi data stok secara manual nanti.');
+    };
+    window.simpanPengaturan = function() {
+        const namaToko = document.getElementById('nama-toko')?.value;
+        if (namaToko) alert('Nama toko tersimpan: ' + namaToko);
+    };
+</script>
 </body>
 </html>
